@@ -1,0 +1,191 @@
+# Fake script: a three-person pricing review. Format: crates/pam-speech/src/fake.rs
+# Alice, Marcus and Jordan introduce themselves, settle the team plan's price, then move on.
+{"config": {"word_delay": 0.9, "settle_delay": 2.88, "duration": 69}}
+
+{"span": 0, "start": 0.76, "end": 4.52}
+{"word": "Okay,", "at": 1.00}
+{"word": "this", "at": 1.32}
+{"word": "is", "at": 1.64}
+{"word": "the", "at": 1.96}
+{"word": "pricing", "at": 2.28}
+{"word": "review.", "at": 2.60}
+{"word": "I'm", "at": 2.92}
+{"word": "Alice,", "at": 3.24}
+{"word": "I", "at": 3.56}
+{"word": "run", "at": 3.88}
+{"word": "product.", "at": 4.20}
+
+{"span": 1, "start": 5.24, "end": 6.12}
+{"word": "Marcus,", "at": 5.48}
+{"word": "engineering.", "at": 5.80}
+
+{"span": 2, "start": 6.84, "end": 8.36}
+{"word": "And", "at": 7.08}
+{"word": "I'm", "at": 7.40}
+{"word": "Jordan,", "at": 7.72}
+{"word": "design.", "at": 8.04}
+
+{"span": 0, "start": 9.08, "end": 12.84}
+{"word": "We", "at": 9.32}
+{"word": "need", "at": 9.64}
+{"word": "to", "at": 9.96}
+{"word": "settle", "at": 10.28}
+{"word": "the", "at": 10.60}
+{"word": "price", "at": 10.92}
+{"word": "of", "at": 11.24}
+{"word": "the", "at": 11.56}
+{"word": "team", "at": 11.88}
+{"word": "plan", "at": 12.20}
+{"word": "today.", "at": 12.52}
+
+{"span": 1, "start": 13.56, "end": 17.64}
+{"word": "I'd", "at": 13.80}
+{"word": "charge", "at": 14.12}
+{"word": "fifty", "at": 14.44}
+{"word": "dollars", "at": 14.76}
+{"word": "a", "at": 15.08}
+{"word": "seat", "at": 15.40}
+{"word": "per", "at": 15.72}
+{"word": "month.", "at": 16.04}
+{"word": "Our", "at": 16.36}
+{"word": "costs", "at": 16.68}
+{"word": "went", "at": 17.00}
+{"word": "up.", "at": 17.32}
+
+{"span": 2, "start": 18.36, "end": 22.12}
+{"word": "Fifty", "at": 18.60}
+{"word": "feels", "at": 18.92}
+{"word": "high", "at": 19.24}
+{"word": "for", "at": 19.56}
+{"word": "small", "at": 19.88}
+{"word": "teams.", "at": 20.20}
+{"word": "Most", "at": 20.52}
+{"word": "competitors", "at": 20.84}
+{"word": "sit", "at": 21.16}
+{"word": "around", "at": 21.48}
+{"word": "thirty.", "at": 21.80}
+
+{"span": 0, "start": 22.84, "end": 28.20}
+{"word": "What", "at": 23.08}
+{"word": "if", "at": 23.40}
+{"word": "we", "at": 23.72}
+{"word": "do", "at": 24.04}
+{"word": "forty", "at": 24.36}
+{"word": "a", "at": 24.68}
+{"word": "seat,", "at": 25.00}
+{"word": "and", "at": 25.32}
+{"word": "free", "at": 25.64}
+{"word": "for", "at": 25.96}
+{"word": "teams", "at": 26.28}
+{"word": "of", "at": 26.60}
+{"word": "up", "at": 26.92}
+{"word": "to", "at": 27.24}
+{"word": "three", "at": 27.56}
+{"word": "people?", "at": 27.88}
+
+{"span": 1, "start": 28.92, "end": 32.68}
+{"word": "Forty", "at": 29.16}
+{"word": "works", "at": 29.48}
+{"word": "for", "at": 29.80}
+{"word": "me,", "at": 30.12}
+{"word": "if", "at": 30.44}
+{"word": "annual", "at": 30.76}
+{"word": "billing", "at": 31.08}
+{"word": "gets", "at": 31.40}
+{"word": "two", "at": 31.72}
+{"word": "months", "at": 32.04}
+{"word": "free.", "at": 32.36}
+
+{"span": 2, "start": 33.40, "end": 37.80}
+{"word": "Agreed.", "at": 33.64}
+{"word": "Forty", "at": 33.96}
+{"word": "a", "at": 34.28}
+{"word": "seat,", "at": 34.60}
+{"word": "free", "at": 34.92}
+{"word": "up", "at": 35.24}
+{"word": "to", "at": 35.56}
+{"word": "three,", "at": 35.88}
+{"word": "two", "at": 36.20}
+{"word": "months", "at": 36.52}
+{"word": "off", "at": 36.84}
+{"word": "for", "at": 37.16}
+{"word": "annual.", "at": 37.48}
+
+{"span": 0, "start": 38.52, "end": 42.60}
+{"word": "Great,", "at": 38.76}
+{"word": "that's", "at": 39.08}
+{"word": "decided.", "at": 39.40}
+{"word": "Marcus,", "at": 39.72}
+{"word": "can", "at": 40.04}
+{"word": "you", "at": 40.36}
+{"word": "update", "at": 40.68}
+{"word": "the", "at": 41.00}
+{"word": "pricing", "at": 41.32}
+{"word": "page", "at": 41.64}
+{"word": "by", "at": 41.96}
+{"word": "Friday?", "at": 42.28}
+
+{"span": 1, "start": 43.32, "end": 44.20}
+{"word": "Will", "at": 43.56}
+{"word": "do.", "at": 43.88}
+
+{"span": 2, "start": 44.92, "end": 49.00}
+{"word": "One", "at": 45.16}
+{"word": "open", "at": 45.48}
+{"word": "question:", "at": 45.80}
+{"word": "do", "at": 46.12}
+{"word": "we", "at": 46.44}
+{"word": "keep", "at": 46.76}
+{"word": "the", "at": 47.08}
+{"word": "old", "at": 47.40}
+{"word": "price", "at": 47.72}
+{"word": "for", "at": 48.04}
+{"word": "existing", "at": 48.36}
+{"word": "customers?", "at": 48.68}
+
+{"span": 0, "start": 49.72, "end": 54.12}
+{"word": "Let's", "at": 49.96}
+{"word": "come", "at": 50.28}
+{"word": "back", "at": 50.60}
+{"word": "to", "at": 50.92}
+{"word": "that", "at": 51.24}
+{"word": "next", "at": 51.56}
+{"word": "week.", "at": 51.88}
+{"word": "Moving", "at": 52.20}
+{"word": "on", "at": 52.52}
+{"word": "to", "at": 52.84}
+{"word": "the", "at": 53.16}
+{"word": "onboarding", "at": 53.48}
+{"word": "emails.", "at": 53.80}
+
+{"span": 2, "start": 54.84, "end": 58.92}
+{"word": "I", "at": 55.08}
+{"word": "drafted", "at": 55.40}
+{"word": "three", "at": 55.72}
+{"word": "emails.", "at": 56.04}
+{"word": "The", "at": 56.36}
+{"word": "first", "at": 56.68}
+{"word": "one", "at": 57.00}
+{"word": "goes", "at": 57.32}
+{"word": "out", "at": 57.64}
+{"word": "on", "at": 57.96}
+{"word": "day", "at": 58.28}
+{"word": "one.", "at": 58.60}
+
+{"span": 1, "start": 59.64, "end": 64.68}
+{"word": "Can", "at": 59.88}
+{"word": "we", "at": 60.20}
+{"word": "cut", "at": 60.52}
+{"word": "it", "at": 60.84}
+{"word": "to", "at": 61.16}
+{"word": "two?", "at": 61.48}
+{"word": "Three", "at": 61.80}
+{"word": "feels", "at": 62.12}
+{"word": "like", "at": 62.44}
+{"word": "a", "at": 62.76}
+{"word": "lot", "at": 63.08}
+{"word": "in", "at": 63.40}
+{"word": "the", "at": 63.72}
+{"word": "first", "at": 64.04}
+{"word": "week.", "at": 64.36}
+

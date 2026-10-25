@@ -1,0 +1,18 @@
+# Fake script: a spoken request corrected while it runs, for crates/pam/tests/agent.rs.
+# Format: crates/pam-speech/src/fake.rs. The stub pi says something on "busy", then works until it is aborted.
+{"config": {"utterance_end": 0.8, "word_delay": 0.3, "settle_delay": 0.6, "duration": 11}}
+
+{"span": 0, "start": 0.5, "end": 2.42}
+{"word": "Pam,", "at": 0.74}
+{"word": "find", "at": 1.06}
+{"word": "the", "at": 1.38}
+{"word": "busy", "at": 1.7}
+{"word": "report.", "at": 2.02}
+
+{"span": 0, "start": 4.5, "end": 6.74}
+{"word": "Pam,", "at": 4.74}
+{"word": "I", "at": 5.06}
+{"word": "meant", "at": 5.38}
+{"word": "the", "at": 5.7}
+{"word": "silent", "at": 6.02}
+{"word": "report.", "at": 6.34}

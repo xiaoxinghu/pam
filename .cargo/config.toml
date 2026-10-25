@@ -1,0 +1,7 @@
+[alias]
+# `cargo pam <command>` builds and runs pam; cargo flags go before the command.
+pam = "run -q -p pam"
+# `cargo dictate -- [flags]` builds and runs dictate; cargo flags go before the `--`.
+dictate = "run -q -p pam-dictate"
+# `cargo live [listen flags]` listens to the mic with the real speech backend.
+live = "run -q -p pam --release --features nemo-speech,qwen,llama-cpp -- listen"

@@ -1,0 +1,29 @@
+# Fake script: a spoken request whose agent asks the room an open question, answered without the name, for
+# crates/pam/tests/agent.rs. Format: crates/pam-speech/src/fake.rs. The request (00:00) is announced at about
+# 00:04; its question shows when the cancel window closes, about 00:09. "Let me think." (00:10) is no answer;
+# "We're in Auckland." (00:12) is, and "Actually, Wellington." (00:17) comes once it has answered the question.
+{"config": {"utterance_end": 0.8, "word_delay": 0.3, "settle_delay": 0.6, "duration": 21}}
+
+{"span": 1, "start": 0.5, "end": 3.06}
+{"word": "Pam,", "at": 0.74}
+{"word": "ask", "at": 1.06}
+{"word": "us", "at": 1.38}
+{"word": "which", "at": 1.7}
+{"word": "city", "at": 2.02}
+{"word": "the", "at": 2.34}
+{"word": "weather's", "at": 2.66}
+{"word": "for.", "at": 2.98}
+
+{"span": 0, "start": 10.8, "end": 11.6}
+{"word": "Let", "at": 11.04}
+{"word": "me", "at": 11.2}
+{"word": "think.", "at": 11.52}
+
+{"span": 1, "start": 12.6, "end": 13.6}
+{"word": "We're", "at": 12.84}
+{"word": "in", "at": 13.16}
+{"word": "Auckland.", "at": 13.52}
+
+{"span": 0, "start": 17.0, "end": 18.0}
+{"word": "Actually,", "at": 17.24}
+{"word": "Wellington.", "at": 17.92}

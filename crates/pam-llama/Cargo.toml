@@ -1,0 +1,25 @@
+[package]
+name = "pam-llama"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+license.workspace = true
+# Gives dependents llama.cpp's source, headers and ggml options (DEP_LLAMA_*),
+# and keeps its libraries linked once.
+links = "llama"
+
+[features]
+# ggml, from llama.cpp b11553 built from source: the one ggml every model in
+# the process runs on. See build.rs.
+ggml = ["dep:pam-build"]
+# llama.cpp, for the local intent check.
+llama-cpp = ["ggml", "dep:bindgen"]
+# llama.cpp's `mtmd`, for pam-speech's `qwen`.
+mtmd = ["llama-cpp"]
+
+[dependencies]
+anyhow.workspace = true
+
+[build-dependencies]
+bindgen = { version = "0.72", optional = true }
+pam-build = { workspace = true, optional = true }

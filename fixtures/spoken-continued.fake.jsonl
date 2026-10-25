@@ -1,0 +1,16 @@
+# Fake script: a spoken request said in three utterances, for crates/pam/tests/agent.rs.
+# Format: crates/pam-speech/src/fake.rs. "hey Pam, can you" stops short; "uh find the weather"
+# makes it a request; "in Auckland", 1.2 s later in the same line, changes it.
+{"config": {"utterance_end": 0.8, "word_delay": 0.3, "settle_delay": 0.6, "duration": 14}}
+
+{"span": 0, "start": 0.3, "end": 5.4}
+{"word": "hey", "at": 0.5}
+{"word": "Pam,", "at": 0.8}
+{"word": "can", "at": 1.1}
+{"word": "you", "at": 1.4}
+{"word": "uh", "at": 2.6}
+{"word": "find", "at": 2.9}
+{"word": "the", "at": 3.2}
+{"word": "weather", "at": 3.5}
+{"word": "in", "at": 4.8}
+{"word": "Auckland", "at": 5.1}

@@ -1,0 +1,30 @@
+[workspace]
+resolver = "3"
+members = ["crates/pam-speech", "crates/pam-audio", "crates/pam-core", "crates/pam", "crates/pam-llama", "crates/pam-build", "crates/pam-dictate"]
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+publish = false
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+pam-speech = { path = "crates/pam-speech" }
+pam-audio = { path = "crates/pam-audio" }
+pam-core = { path = "crates/pam-core" }
+pam-llama = { path = "crates/pam-llama" }
+pam-build = { path = "crates/pam-build" }
+anyhow = "1"
+chrono = "0.4"
+cpal = "0.18"
+crossbeam-channel = "0.5"
+hound = "3.5"
+libc = "0.2"
+ratatui = "0.30"
+rubato = "5"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+toml = "0.9"
+unicode-width = "0.2"
+vt100 = "0.18"

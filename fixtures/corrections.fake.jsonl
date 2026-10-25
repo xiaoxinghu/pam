@@ -1,0 +1,88 @@
+# Fake script: a tracker that splits one voice and mislabels one line, 3 people. Format: crates/pam-speech/src/fake.rs
+# Words are NeMo-style 80 ms emission stamps every 0.32 s; spans settle 2.88 s late, as the live diarizer's labels do.
+# Cases for manual corrections:
+# - Marcus is heard as two voices: spk_1 ("Marcus here", named by the intro fast path) and
+#   spk_3 (the release lines, never introduced). Fix: merge spk_3 into Marcus.
+# - Jordan's answer "Sure, I'll send them tonight." lands on Alice's slot, right after Alice
+#   asks Jordan for the mockups (u0007). Fix: move u0007 to Jordan.
+{"config": {"word_delay": 0.9, "settle_delay": 2.88, "duration": 35}}
+
+{"span": 0, "start": 0.88, "end": 3.68}
+{"word": "Okay,", "at": 1.12}
+{"word": "let's", "at": 1.44}
+{"word": "start.", "at": 1.76}
+{"word": "I'm", "at": 2.08}
+{"word": "Alice,", "at": 2.40}
+{"word": "I", "at": 2.72}
+{"word": "run", "at": 3.04}
+{"word": "product.", "at": 3.36}
+
+{"span": 1, "start": 4.72, "end": 7.20}
+{"word": "Marcus", "at": 4.96}
+{"word": "here,", "at": 5.28}
+{"word": "engineering.", "at": 5.60}
+{"word": "The", "at": 5.92}
+{"word": "build", "at": 6.24}
+{"word": "is", "at": 6.56}
+{"word": "green.", "at": 6.88}
+
+{"span": 2, "start": 8.24, "end": 11.04}
+{"word": "And", "at": 8.48}
+{"word": "my", "at": 8.80}
+{"word": "name", "at": 9.12}
+{"word": "is", "at": 9.44}
+{"word": "Jordan,", "at": 9.76}
+{"word": "I", "at": 10.08}
+{"word": "do", "at": 10.40}
+{"word": "design.", "at": 10.72}
+
+{"span": 0, "start": 12.08, "end": 14.56}
+{"word": "Great.", "at": 12.32}
+{"word": "Marcus,", "at": 12.64}
+{"word": "how", "at": 12.96}
+{"word": "is", "at": 13.28}
+{"word": "the", "at": 13.60}
+{"word": "release", "at": 13.92}
+{"word": "looking?", "at": 14.24}
+
+{"span": 3, "start": 15.60, "end": 18.40}
+{"word": "We", "at": 15.84}
+{"word": "ship", "at": 16.16}
+{"word": "Thursday", "at": 16.48}
+{"word": "if", "at": 16.80}
+{"word": "the", "at": 17.12}
+{"word": "review", "at": 17.44}
+{"word": "lands", "at": 17.76}
+{"word": "today.", "at": 18.08}
+
+{"span": 0, "start": 19.44, "end": 22.24}
+{"word": "Good.", "at": 19.68}
+{"word": "Jordan,", "at": 20.00}
+{"word": "can", "at": 20.32}
+{"word": "you", "at": 20.64}
+{"word": "send", "at": 20.96}
+{"word": "the", "at": 21.28}
+{"word": "new", "at": 21.60}
+{"word": "mockups?", "at": 21.92}
+
+{"span": 0, "start": 23.28, "end": 25.12}
+{"word": "Sure,", "at": 23.52}
+{"word": "I'll", "at": 23.84}
+{"word": "send", "at": 24.16}
+{"word": "them", "at": 24.48}
+{"word": "tonight.", "at": 24.80}
+
+{"span": 3, "start": 26.16, "end": 28.32}
+{"word": "I'll", "at": 26.40}
+{"word": "review", "at": 26.72}
+{"word": "them", "at": 27.04}
+{"word": "first", "at": 27.36}
+{"word": "thing", "at": 27.68}
+{"word": "tomorrow.", "at": 28.00}
+
+{"span": 2, "start": 29.36, "end": 31.20}
+{"word": "Thanks,", "at": 29.60}
+{"word": "that", "at": 29.92}
+{"word": "works", "at": 30.24}
+{"word": "for", "at": 30.56}
+{"word": "me.", "at": 30.88}

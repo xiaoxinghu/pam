@@ -1,0 +1,162 @@
+# Fake script: two spoken requests four minutes apart, so the second prompt catches up on the gap between them.
+# Format: crates/pam-speech/src/fake.rs. Slots: 0 = Alice, 1 = Marcus. Requests at 00:19 and 04:30.
+{"config": {"word_delay": 0.3, "settle_delay": 0.6, "duration": 285}}
+
+{"span": 0, "start": 2.5, "end": 5.3}
+{"word": "Hi", "at": 2.74}
+{"word": "everyone,", "at": 3.06}
+{"word": "I'm", "at": 3.38}
+{"word": "Alice", "at": 3.7}
+{"word": "and", "at": 4.02}
+{"word": "I", "at": 4.34}
+{"word": "run", "at": 4.66}
+{"word": "product.", "at": 4.98}
+
+{"span": 1, "start": 8.5, "end": 11.3}
+{"word": "And", "at": 8.74}
+{"word": "I'm", "at": 9.06}
+{"word": "Marcus,", "at": 9.38}
+{"word": "I", "at": 9.7}
+{"word": "look", "at": 10.02}
+{"word": "after", "at": 10.34}
+{"word": "the", "at": 10.66}
+{"word": "backend.", "at": 10.98}
+
+{"span": 0, "start": 14.5, "end": 17.3}
+{"word": "Let's", "at": 14.74}
+{"word": "sort", "at": 15.06}
+{"word": "out", "at": 15.38}
+{"word": "pricing", "at": 15.7}
+{"word": "for", "at": 16.02}
+{"word": "the", "at": 16.34}
+{"word": "launch", "at": 16.66}
+{"word": "today.", "at": 16.98}
+
+{"span": 1, "start": 19.5, "end": 23.26}
+{"word": "Pam,", "at": 19.74}
+{"word": "what", "at": 20.06}
+{"word": "did", "at": 20.38}
+{"word": "we", "at": 20.7}
+{"word": "charge", "at": 21.02}
+{"word": "last", "at": 21.34}
+{"word": "year", "at": 21.66}
+{"word": "for", "at": 21.98}
+{"word": "the", "at": 22.3}
+{"word": "team", "at": 22.62}
+{"word": "plan?", "at": 22.94}
+
+{"span": 0, "start": 40.5, "end": 45.54}
+{"word": "Okay.", "at": 40.74}
+{"word": "I", "at": 41.06}
+{"word": "think", "at": 41.38}
+{"word": "forty", "at": 41.7}
+{"word": "dollars", "at": 42.02}
+{"word": "a", "at": 42.34}
+{"word": "seat", "at": 42.66}
+{"word": "a", "at": 42.98}
+{"word": "month", "at": 43.3}
+{"word": "is", "at": 43.62}
+{"word": "right", "at": 43.94}
+{"word": "for", "at": 44.26}
+{"word": "the", "at": 44.58}
+{"word": "team", "at": 44.9}
+{"word": "plan.", "at": 45.22}
+
+{"span": 1, "start": 62.5, "end": 65.94}
+{"word": "Agreed,", "at": 62.74}
+{"word": "forty", "at": 63.06}
+{"word": "a", "at": 63.38}
+{"word": "seat,", "at": 63.7}
+{"word": "with", "at": 64.02}
+{"word": "a", "at": 64.34}
+{"word": "discount", "at": 64.66}
+{"word": "for", "at": 64.98}
+{"word": "annual", "at": 65.3}
+{"word": "plans.", "at": 65.62}
+
+{"span": 0, "start": 88.5, "end": 92.58}
+{"word": "Let's", "at": 88.74}
+{"word": "make", "at": 89.06}
+{"word": "it", "at": 89.38}
+{"word": "twenty", "at": 89.7}
+{"word": "percent", "at": 90.02}
+{"word": "off", "at": 90.34}
+{"word": "when", "at": 90.66}
+{"word": "they", "at": 90.98}
+{"word": "pay", "at": 91.3}
+{"word": "for", "at": 91.62}
+{"word": "a", "at": 91.94}
+{"word": "year.", "at": 92.26}
+
+{"span": 1, "start": 115.5, "end": 117.98}
+{"word": "Fine", "at": 115.74}
+{"word": "by", "at": 116.06}
+{"word": "me.", "at": 116.38}
+{"word": "Twenty", "at": 116.7}
+{"word": "percent", "at": 117.02}
+{"word": "for", "at": 117.34}
+{"word": "annual.", "at": 117.66}
+
+{"span": 0, "start": 140.5, "end": 142.98}
+{"word": "The", "at": 140.74}
+{"word": "launch", "at": 141.06}
+{"word": "date", "at": 141.38}
+{"word": "is", "at": 141.7}
+{"word": "the", "at": 142.02}
+{"word": "next", "at": 142.34}
+{"word": "question.", "at": 142.66}
+
+{"span": 1, "start": 166.5, "end": 169.3}
+{"word": "Engineering", "at": 166.74}
+{"word": "needs", "at": 167.06}
+{"word": "two", "at": 167.38}
+{"word": "more", "at": 167.7}
+{"word": "weeks", "at": 168.02}
+{"word": "to", "at": 168.34}
+{"word": "finish", "at": 168.66}
+{"word": "billing.", "at": 168.98}
+
+{"span": 0, "start": 192.5, "end": 195.62}
+{"word": "Then", "at": 192.74}
+{"word": "let's", "at": 193.06}
+{"word": "launch", "at": 193.38}
+{"word": "on", "at": 193.7}
+{"word": "the", "at": 194.02}
+{"word": "twenty", "at": 194.34}
+{"word": "fourth", "at": 194.66}
+{"word": "of", "at": 194.98}
+{"word": "November.", "at": 195.3}
+
+{"span": 1, "start": 218.5, "end": 220.98}
+{"word": "Agreed,", "at": 218.74}
+{"word": "November", "at": 219.06}
+{"word": "twenty", "at": 219.38}
+{"word": "fourth.", "at": 219.7}
+{"word": "I'll", "at": 220.02}
+{"word": "tell", "at": 220.34}
+{"word": "marketing.", "at": 220.66}
+
+{"span": 0, "start": 244.5, "end": 246.66}
+{"word": "Jordan", "at": 244.74}
+{"word": "should", "at": 245.06}
+{"word": "own", "at": 245.38}
+{"word": "the", "at": 245.7}
+{"word": "launch", "at": 246.02}
+{"word": "email.", "at": 246.34}
+
+{"span": 1, "start": 270.5, "end": 275.54}
+{"word": "Pam,", "at": 270.74}
+{"word": "can", "at": 271.06}
+{"word": "you", "at": 271.38}
+{"word": "sum", "at": 271.7}
+{"word": "up", "at": 272.02}
+{"word": "what", "at": 272.34}
+{"word": "we", "at": 272.66}
+{"word": "decided", "at": 272.98}
+{"word": "on", "at": 273.3}
+{"word": "the", "at": 273.62}
+{"word": "price", "at": 273.94}
+{"word": "and", "at": 274.26}
+{"word": "the", "at": 274.58}
+{"word": "launch", "at": 274.9}
+{"word": "date?", "at": 275.22}

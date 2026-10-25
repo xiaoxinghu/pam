@@ -1,0 +1,35 @@
+[package]
+name = "pam-dictate"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# The crate is pam-dictate; the command it installs is `dictate`.
+[[bin]]
+name = "dictate"
+path = "src/main.rs"
+
+[features]
+# The NeMo-Speech.cpp backend (`--asr nemo-speech:nemotron-en`); see crates/pam-speech/build.rs.
+nemo-speech = ["pam-speech/nemo-speech"]
+# The Qwen3-ASR backend (`--asr qwen:qwen3-asr-1.7b`); see crates/pam-speech/build.rs.
+qwen = ["pam-speech/qwen"]
+
+[dependencies]
+pam-speech.workspace = true
+pam-audio.workspace = true
+anyhow.workspace = true
+libc.workspace = true
+# `line_count`, to keep the latest words in view as the transcript outgrows it.
+ratatui = { workspace = true, features = ["unstable-rendered-line-info"] }
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+
+[dev-dependencies]
+# The tiny test models' checksums.
+sha2 = "0.10"
+tempfile.workspace = true
+# Reads the screen the terminal face draws on a pseudo-terminal.
+vt100.workspace = true

@@ -1,0 +1,10 @@
+[package]
+name = "pam-build"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+# Only a build dependency: pam-llama's and pam-speech's build scripts use it
+# to fetch and build the native libraries they link statically.
+[dependencies]

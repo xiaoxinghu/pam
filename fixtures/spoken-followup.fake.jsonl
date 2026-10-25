@@ -1,0 +1,25 @@
+# Fake script: a request, then a correction once it is answered, for crates/pam/tests/agent.rs.
+# Format: crates/pam-speech/src/fake.rs. The answer shows when its cancel window closes (about 00:10); the correction comes at 00:14.
+{"config": {"utterance_end": 0.8, "word_delay": 0.3, "settle_delay": 0.6, "duration": 22}}
+
+{"span": 0, "start": 0.5, "end": 2.42}
+{"word": "Okay,", "at": 0.74}
+{"word": "we", "at": 1.06}
+{"word": "ship", "at": 1.38}
+{"word": "on", "at": 1.7}
+{"word": "Friday.", "at": 2.02}
+
+{"span": 1, "start": 3.0, "end": 4.92}
+{"word": "Pam,", "at": 3.24}
+{"word": "what", "at": 3.56}
+{"word": "did", "at": 3.88}
+{"word": "we", "at": 4.2}
+{"word": "decide?", "at": 4.52}
+
+{"span": 1, "start": 14.0, "end": 16.24}
+{"word": "Pam,", "at": 14.24}
+{"word": "I", "at": 14.56}
+{"word": "meant", "at": 14.88}
+{"word": "the", "at": 15.2}
+{"word": "launch", "at": 15.52}
+{"word": "date.", "at": 15.84}

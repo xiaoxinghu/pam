@@ -1,0 +1,15 @@
+[package]
+name = "qwen-gguf"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MIT OR Apache-2.0"
+
+# Run once per machine to make the `qwen` backend's model files, so it stays
+# out of the pam workspace and its builds.
+[workspace]
+
+[dependencies]
+anyhow = "1"
+half = "2"
+serde_json = "1"

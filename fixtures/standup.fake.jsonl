@@ -1,0 +1,103 @@
+# Fake script: a three-person stand-up, 42 s. Format: crates/pam-speech/src/fake.rs
+# Words are NeMo-style 80 ms emission stamps; spans settle 2.88 s late, as the live diarizer's labels do.
+# Cases:
+# - a 2.2 s pause splits Alice's 10-20 s speech into two lines;
+# - cross-talk: Marcus's and Jordan's spans overlap at 25.04-25.52 s, and "mobile." lies
+#   inside both, so the tie goes to the previous word's speaker;
+# - "exactly." and "me." fall just after their spans: the nearest-span fallback.
+{"config": {"word_delay": 0.9, "settle_delay": 2.88, "duration": 42}}
+
+{"span": 0, "start": 0.88, "end": 5.36}
+{"word": "Okay,", "at": 1.12}
+{"word": "let's", "at": 1.44}
+{"word": "get", "at": 1.76}
+{"word": "started.", "at": 2.08}
+{"word": "Quick", "at": 2.32}
+{"word": "intros", "at": 2.64}
+{"word": "for", "at": 2.96}
+{"word": "the", "at": 3.28}
+{"word": "bot.", "at": 3.52}
+{"word": "I'm", "at": 3.84}
+{"word": "Alice,", "at": 4.16}
+{"word": "I", "at": 4.48}
+{"word": "run", "at": 4.72}
+{"word": "product.", "at": 5.04}
+
+{"span": 1, "start": 5.84, "end": 7.36}
+{"word": "Marcus,", "at": 6.32}
+{"word": "engineering.", "at": 6.88}
+
+{"span": 2, "start": 7.84, "end": 9.76}
+{"word": "And", "at": 8.16}
+{"word": "I'm", "at": 8.64}
+{"word": "Jordan,", "at": 9.04}
+{"word": "design.", "at": 9.44}
+
+{"span": 0, "start": 10.24, "end": 13.92}
+{"word": "Today", "at": 10.72}
+{"word": "is", "at": 11.28}
+{"word": "about", "at": 11.84}
+{"word": "the", "at": 12.40}
+{"word": "onboarding", "at": 12.96}
+{"word": "redesign.", "at": 13.52}
+
+{"span": 0, "start": 15.44, "end": 19.92}
+{"word": "We're", "at": 15.84}
+{"word": "deciding", "at": 16.24}
+{"word": "between", "at": 16.64}
+{"word": "the", "at": 17.04}
+{"word": "three-step", "at": 17.52}
+{"word": "flow", "at": 17.92}
+{"word": "and", "at": 18.32}
+{"word": "a", "at": 18.72}
+{"word": "single", "at": 19.20}
+{"word": "page.", "at": 19.60}
+
+{"span": 1, "start": 20.48, "end": 25.52}
+{"word": "Single", "at": 20.80}
+{"word": "page", "at": 21.12}
+{"word": "is", "at": 21.52}
+{"word": "faster", "at": 21.84}
+{"word": "to", "at": 22.16}
+{"word": "build,", "at": 22.56}
+{"word": "but", "at": 22.88}
+{"word": "I", "at": 23.28}
+{"word": "worry", "at": 23.60}
+{"word": "about", "at": 24.00}
+{"word": "drop-off", "at": 24.32}
+{"word": "on", "at": 24.64}
+{"word": "mobile.", "at": 25.04}
+
+{"span": 2, "start": 25.04, "end": 29.12}
+{"word": "Mobile", "at": 25.84}
+{"word": "is", "at": 26.24}
+{"word": "where", "at": 26.64}
+{"word": "most", "at": 26.96}
+{"word": "sign-ups", "at": 27.36}
+{"word": "start,", "at": 27.68}
+{"word": "so", "at": 28.08}
+{"word": "that", "at": 28.48}
+{"word": "matters.", "at": 28.80}
+
+{"span": 1, "start": 29.68, "end": 30.56}
+{"word": "Right,", "at": 30.08}
+{"word": "exactly.", "at": 30.72}
+
+{"span": 0, "start": 31.84, "end": 37.68}
+{"word": "Then", "at": 32.24}
+{"word": "let's", "at": 32.72}
+{"word": "prototype", "at": 33.28}
+{"word": "both", "at": 33.76}
+{"word": "and", "at": 34.24}
+{"word": "look", "at": 34.72}
+{"word": "at", "at": 35.28}
+{"word": "the", "at": 35.76}
+{"word": "numbers", "at": 36.24}
+{"word": "next", "at": 36.72}
+{"word": "week.", "at": 37.28}
+
+{"span": 2, "start": 38.24, "end": 39.68}
+{"word": "Sounds", "at": 38.64}
+{"word": "good", "at": 39.04}
+{"word": "to", "at": 39.44}
+{"word": "me.", "at": 39.76}

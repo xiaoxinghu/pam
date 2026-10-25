@@ -1,0 +1,33 @@
+# Fake script: spoken requests, short, for crates/pam/tests/agent.rs. Format: crates/pam-speech/src/fake.rs
+# A question (00:03), someone else called Pam (00:09), a request (00:12) and its cancel (00:16).
+{"config": {"utterance_end": 0.8, "word_delay": 0.3, "settle_delay": 0.6, "duration": 23}}
+
+{"span": 0, "start": 0.5, "end": 2.42}
+{"word": "Okay,", "at": 0.74}
+{"word": "we", "at": 1.06}
+{"word": "ship", "at": 1.38}
+{"word": "on", "at": 1.7}
+{"word": "Friday.", "at": 2.02}
+
+{"span": 1, "start": 3.0, "end": 4.92}
+{"word": "Pam,", "at": 3.24}
+{"word": "what", "at": 3.56}
+{"word": "did", "at": 3.88}
+{"word": "we", "at": 4.2}
+{"word": "decide?", "at": 4.52}
+
+{"span": 0, "start": 9.0, "end": 10.6}
+{"word": "Pam", "at": 9.24}
+{"word": "from", "at": 9.56}
+{"word": "finance", "at": 9.88}
+{"word": "agreed.", "at": 10.2}
+
+{"span": 1, "start": 12.0, "end": 13.6}
+{"word": "Pam,", "at": 12.24}
+{"word": "draft", "at": 12.56}
+{"word": "an", "at": 12.88}
+{"word": "email.", "at": 13.2}
+
+{"span": 0, "start": 16.5, "end": 17.46}
+{"word": "Pam,", "at": 16.74}
+{"word": "cancel.", "at": 17.06}

@@ -1,0 +1,34 @@
+[package]
+name = "pam-speech"
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+license.workspace = true
+# Keeps NeMo-Speech linked once.
+links = "nemo_speech"
+
+[features]
+# The NeMo-Speech.cpp backend, built from source on pam-llama's ggml; see
+# build.rs.
+nemo-speech = ["dep:pam-llama", "pam-llama/ggml", "dep:pam-build", "dep:bindgen"]
+# Qwen3-ASR through llama.cpp's `mtmd`, with Qwen3-ForcedAligner from
+# qwen3-asr.cpp compiled against the same llama.cpp; see build.rs.
+qwen = ["dep:pam-llama", "pam-llama/mtmd", "dep:pam-build", "dep:bindgen", "dep:cc"]
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+# The model store checks what it downloads.
+sha2 = "0.10"
+# llama.cpp and its ggml, which both backends run on (DEP_LLAMA_* in build.rs).
+pam-llama = { workspace = true, optional = true }
+
+[build-dependencies]
+bindgen = { version = "0.72", optional = true }
+cc = { version = "1", optional = true }
+pam-build = { workspace = true, optional = true }
+
+[dev-dependencies]
+hound.workspace = true
+tempfile.workspace = true

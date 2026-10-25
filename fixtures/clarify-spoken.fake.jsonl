@@ -1,0 +1,18 @@
+# Fake script: a spoken request whose agent asks the room, answered by voice, for crates/pam/tests/agent.rs.
+# Format: crates/pam-speech/src/fake.rs. The request (00:00) is announced at about 00:03; its question shows
+# when the cancel window closes, about 00:08, and "Pam, option two." (00:10) answers it.
+{"config": {"utterance_end": 0.8, "word_delay": 0.3, "settle_delay": 0.6, "duration": 15}}
+
+{"span": 1, "start": 0.5, "end": 2.74}
+{"word": "Pam,", "at": 0.74}
+{"word": "ask", "at": 1.06}
+{"word": "us", "at": 1.38}
+{"word": "which", "at": 1.7}
+{"word": "customer", "at": 2.02}
+{"word": "to", "at": 2.34}
+{"word": "email.", "at": 2.66}
+
+{"span": 0, "start": 10.0, "end": 11.28}
+{"word": "Pam,", "at": 10.24}
+{"word": "option", "at": 10.56}
+{"word": "two.", "at": 10.88}

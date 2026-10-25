@@ -1,0 +1,95 @@
+# Fake script: an introductions round with a late joiner, 4 people. Format: crates/pam-speech/src/fake.rs
+# Words are NeMo-style 80 ms emission stamps every 0.32 s; spans settle 2.88 s late, as the live diarizer's labels do.
+# Cases for naming from introductions:
+# - "I'm Alice", "Marcus here", "my name is Jordan" name spk_0..spk_2 as each line is final;
+# - Sam (spk_3) speaks before introducing themselves; "I'm late" names nobody, and their
+#   later "I'm Sam" relabels the earlier line;
+# - Marcus's "This is Figma, by the way" matches a pattern, but Marcus already has a name.
+{"config": {"word_delay": 0.9, "settle_delay": 2.88, "duration": 38}}
+
+{"span": 0, "start": 0.88, "end": 5.28}
+{"word": "Okay,", "at": 1.12}
+{"word": "let's", "at": 1.44}
+{"word": "start.", "at": 1.76}
+{"word": "Quick", "at": 2.08}
+{"word": "intros", "at": 2.40}
+{"word": "for", "at": 2.72}
+{"word": "the", "at": 3.04}
+{"word": "bot.", "at": 3.36}
+{"word": "I'm", "at": 3.68}
+{"word": "Alice,", "at": 4.00}
+{"word": "I", "at": 4.32}
+{"word": "run", "at": 4.64}
+{"word": "product.", "at": 4.96}
+
+{"span": 1, "start": 6.32, "end": 7.52}
+{"word": "Marcus", "at": 6.56}
+{"word": "here,", "at": 6.88}
+{"word": "engineering.", "at": 7.20}
+
+{"span": 2, "start": 8.56, "end": 11.36}
+{"word": "And", "at": 8.80}
+{"word": "my", "at": 9.12}
+{"word": "name", "at": 9.44}
+{"word": "is", "at": 9.76}
+{"word": "Jordan,", "at": 10.08}
+{"word": "I", "at": 10.40}
+{"word": "do", "at": 10.72}
+{"word": "design.", "at": 11.04}
+
+{"span": 0, "start": 12.40, "end": 15.52}
+{"word": "Great.", "at": 12.64}
+{"word": "Sam", "at": 12.96}
+{"word": "said", "at": 13.28}
+{"word": "they'd", "at": 13.60}
+{"word": "join", "at": 13.92}
+{"word": "late,", "at": 14.24}
+{"word": "so", "at": 14.56}
+{"word": "let's", "at": 14.88}
+{"word": "begin.", "at": 15.20}
+
+{"span": 3, "start": 16.56, "end": 19.36}
+{"word": "Sorry", "at": 16.80}
+{"word": "I'm", "at": 17.12}
+{"word": "late.", "at": 17.44}
+{"word": "Did", "at": 17.76}
+{"word": "I", "at": 18.08}
+{"word": "miss", "at": 18.40}
+{"word": "the", "at": 18.72}
+{"word": "intros?", "at": 19.04}
+
+{"span": 0, "start": 20.40, "end": 21.92}
+{"word": "Just", "at": 20.64}
+{"word": "now.", "at": 20.96}
+{"word": "Go", "at": 21.28}
+{"word": "ahead.", "at": 21.60}
+
+{"span": 3, "start": 22.96, "end": 25.76}
+{"word": "Thanks.", "at": 23.20}
+{"word": "I'm", "at": 23.52}
+{"word": "Sam,", "at": 23.84}
+{"word": "by", "at": 24.16}
+{"word": "the", "at": 24.48}
+{"word": "way,", "at": 24.80}
+{"word": "from", "at": 25.12}
+{"word": "sales.", "at": 25.44}
+
+{"span": 1, "start": 26.80, "end": 30.24}
+{"word": "This", "at": 27.04}
+{"word": "is", "at": 27.36}
+{"word": "Figma,", "at": 27.68}
+{"word": "by", "at": 28.00}
+{"word": "the", "at": 28.32}
+{"word": "way,", "at": 28.64}
+{"word": "where", "at": 28.96}
+{"word": "the", "at": 29.28}
+{"word": "flows", "at": 29.60}
+{"word": "live.", "at": 29.92}
+
+{"span": 2, "start": 31.28, "end": 33.44}
+{"word": "Let's", "at": 31.52}
+{"word": "start", "at": 31.84}
+{"word": "with", "at": 32.16}
+{"word": "the", "at": 32.48}
+{"word": "onboarding", "at": 32.80}
+{"word": "flow.", "at": 33.12}
