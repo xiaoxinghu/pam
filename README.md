@@ -2,7 +2,51 @@
 
 A meeting assistant for macOS. It listens to the room through one mic, transcribes it live, tells speakers apart, names them when they introduce themselves, keeps notes, and answers questions you type to it.
 
-## Usage
+The same repository has [`dictate`](#dictate), a dictation command: it records, transcribes as you speak, and hands back the text.
+
+## dictate
+
+### Install
+
+You need macOS with:
+
+- the Xcode Command Line Tools (`xcode-select --install`), for clang, git and the linker;
+- Rust, from [rustup](https://rustup.rs);
+- CMake and Ninja (`brew install cmake ninja`).
+
+Install it with cargo:
+
+```sh
+cargo install --locked --git https://github.com/xiaoxinghu/pam --tag dictate-v0.1.0 pam-dictate
+```
+
+or with [mise](https://mise.jdx.dev), in `~/.config/mise/config.toml`, then `mise install`:
+
+```toml
+[tools]
+"cargo:https://github.com/xiaoxinghu/pam" = { version = "tag:dictate-v0.1.0", crate = "pam-dictate" }
+```
+
+Either one builds from source, in about a minute and a half on an M1 Pro. The first build also fetches [NeMo-Speech.cpp](https://github.com/NVIDIA/NeMo-Speech.cpp) and [llama.cpp](https://github.com/ggml-org/llama.cpp) and builds them in `~/Library/Caches/pam`. Both are linked into `dictate`, so the binary needs nothing beside it, and you can clear that folder afterwards.
+
+Then download the speech model, once:
+
+```sh
+dictate models pull
+```
+
+That is `nemotron-en`, about 700 MB, which goes into the model store shared with `pam`: `~/Library/Application Support/pam/models`, or `$PAM_MODELS`. `dictate` never downloads a model on its own.
+
+### Use
+
+```sh
+dictate            # speak; Enter prints the text, Escape discards it
+dictate | pbcopy   # the same, and the text goes to the clipboard
+```
+
+When stdin isn't a terminal, or with `--json`, `dictate` speaks JSON lines instead, for a program to drive: events on stdout, `stop` or `cancel` on stdin. The end of stdin counts as `cancel`, so keep it open. `dictate --help` covers the options, the config file (`~/.config/dictate/config.toml`) and the protocol.
+
+## Using `pam`
 
 ```sh
 pam listen --title "Stand-up"
@@ -40,7 +84,7 @@ pam models pull
 
 That is the speech models, and the local intent model (2.7 GB) when `intent_model = "local"`. Models go into the model store, `~/Library/Application Support/pam/models` (or `$PAM_MODELS`), which `pam` shares with `dictate`: each is downloaded once, checked against its pinned SHA-256, and kept where macOS doesn't clear caches. `pam listen` never downloads one itself: a missing model stops it before the meeting, saying what to pull. `pam models list` shows what the store holds and what `pam` uses, `pam models rm <name>` removes a model, and `pam models path` prints the store's folder.
 
-`dictate`, the dictation command, is built the same way and copied the same way: `cargo build --release -p pam-dictate --features nemo-speech,qwen`, then `target/release/dictate`, or `cargo install --path crates/pam-dictate --features nemo-speech` to put `dictate` in `~/.cargo/bin`. It has the same command under its own name: `dictate models pull` fetches what its config uses.
+`dictate` has `nemo-speech` by default. From a checkout, `cargo install --path crates/pam-dictate` puts it in `~/.cargo/bin`; add `--features qwen` for the Qwen3-ASR transcriber, whose model is made with `tools/qwen-gguf/make.sh` as for `pam`. `--no-default-features` builds it with only the fake backend.
 
 To build and run in one step, use `cargo pam` in place of `pam`. Cargo flags go before the command:
 

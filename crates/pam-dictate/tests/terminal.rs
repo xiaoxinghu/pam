@@ -271,9 +271,13 @@ fn no_speech_and_errors_are_a_sentence_on_stderr() {
     assert!(end.stderr.contains("unknown option --bogus"), "{}", end.stderr);
 }
 
-#[cfg(feature = "nemo-speech")]
 #[test]
 fn a_missing_model_is_a_sentence_before_any_view() {
+    // pam-speech may have the backend without this crate's feature, when the
+    // workspace builds them together.
+    if !pam_speech::built("nemo-speech") {
+        return;
+    }
     let dir = tempfile::tempdir().unwrap();
     let wav = dir.path().join("room.wav");
     let mut rec = pam_audio::Recorder::create(&wav).unwrap();

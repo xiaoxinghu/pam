@@ -13,7 +13,7 @@ fn main() {
 }
 
 /// The headers' folders pam-llama gives: llama.cpp's, ggml's and mtmd's.
-#[cfg(any(feature = "nemo-speech", feature = "qwen"))]
+#[cfg(feature = "qwen")]
 fn llama_include() -> Vec<std::path::PathBuf> {
     let include = std::env::var_os("DEP_LLAMA_INCLUDE").expect("pam-llama gives its headers");
     std::env::split_paths(&include).collect()

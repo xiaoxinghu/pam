@@ -404,8 +404,10 @@ fn listening_to_a_recording_uses_the_backends_in_the_config_file() {
     let stderr = String::from_utf8(out.stderr).unwrap();
     assert_ne!(out.status.code(), Some(0));
     // The backend is refused before the dashboard starts or any folder is made.
+    // pam-speech, not pam, says whether it has the backend: a workspace build
+    // turns it on for dictate.
     let why =
-        if cfg!(feature = "nemo-speech") { "no model file /nowhere/" } else { "--features nemo-speech" };
+        if pam_speech::built("nemo-speech") { "no model file /nowhere/" } else { "--features nemo-speech" };
     assert!(stderr.contains(why), "{stderr}");
     assert!(!root.exists());
 }
@@ -436,7 +438,7 @@ fn a_model_missing_from_the_store_stops_listen_before_the_meeting() {
         .output()
         .unwrap();
     let stderr = String::from_utf8(out.stderr).unwrap();
-    if cfg!(feature = "nemo-speech") {
+    if pam_speech::built("nemo-speech") {
         assert_eq!(out.status.code(), Some(4), "{stderr}");
         assert!(stderr.contains("model `nemotron-en` isn't in the model store"), "{stderr}");
         assert!(stderr.contains(&models.display().to_string()), "{stderr}");

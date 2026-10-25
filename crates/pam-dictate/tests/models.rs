@@ -36,7 +36,7 @@ fn a_missing_model_stops_it_before_the_mic_opens() {
     let events = events(&out);
     let kinds: Vec<&str> = events.iter().map(|e| e["event"].as_str().unwrap()).collect();
     let message = events.last().unwrap()["message"].as_str().unwrap();
-    if cfg!(feature = "nemo-speech") {
+    if pam_speech::built("nemo-speech") {
         assert_eq!(kinds, ["error"], "before anything loads");
         assert!(message.starts_with("model `nemotron-en` isn't in the model store"), "{message}");
         assert!(message.contains(&models.display().to_string()), "{message}");

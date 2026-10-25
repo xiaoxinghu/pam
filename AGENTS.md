@@ -21,7 +21,7 @@
 
 `tools/qwen-gguf`, outside the workspace, makes the `qwen` backend's model files: `make.sh` converts Qwen's checkpoints into the model store with its Rust converters. It runs once per machine, so its build stays out of the workspace's.
 
-The real speech backends sit behind cargo features (`nemo-speech`, `qwen`, `llama-cpp`). Without them the `fake` backend replays `.fake.jsonl` scripts, which is how the tests run without a mic or models. A change keeps `cargo build --workspace` and `cargo test --workspace` passing both with the features and without them.
+The real speech backends sit behind cargo features (`nemo-speech`, `qwen`, `llama-cpp`). `pam-dictate` has `nemo-speech` by default, so `cargo install` makes a useful `dictate`; in a workspace build that turns the backend on in `pam-speech` for every crate, so tests ask `pam_speech::built` rather than their own crate's features. Without the features (`--no-default-features`) the `fake` backend replays `.fake.jsonl` scripts, which is how the tests run without a mic or models. A change keeps `cargo build --workspace` and `cargo test --workspace` passing with the features, with the defaults, and with `--no-default-features`.
 
 ## Code rules
 
