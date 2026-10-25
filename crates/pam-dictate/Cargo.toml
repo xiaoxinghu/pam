@@ -1,7 +1,8 @@
 [package]
 name = "pam-dictate"
 edition.workspace = true
-version.workspace = true
+# dictate is released on its own: tags `dictate-v<version>` carry this version.
+version = "0.1.0"
 publish.workspace = true
 license.workspace = true
 
@@ -11,6 +12,9 @@ name = "dictate"
 path = "src/main.rs"
 
 [features]
+# A useful `dictate` with no flags, so `cargo install` needs no `--features`;
+# with `--no-default-features` only the fake backend is built.
+default = ["nemo-speech"]
 # The NeMo-Speech.cpp backend (`--asr nemo-speech:nemotron-en`); see crates/pam-speech/build.rs.
 nemo-speech = ["pam-speech/nemo-speech"]
 # The Qwen3-ASR backend (`--asr qwen:qwen3-asr-1.7b`); see crates/pam-speech/build.rs.
