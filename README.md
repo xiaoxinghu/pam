@@ -27,7 +27,7 @@ or with [mise](https://mise.jdx.dev), in `~/.config/mise/config.toml`, then `mis
 "cargo:https://github.com/xiaoxinghu/pam" = { version = "tag:dictate-v0.1.0", crate = "pam-dictate" }
 ```
 
-Either one builds from source. The first build also fetches [NeMo-Speech.cpp](https://github.com/NVIDIA/NeMo-Speech.cpp) and [llama.cpp](https://github.com/ggml-org/llama.cpp) and builds them in `~/Library/Caches/pam`. Both are linked into `dictate`, so the binary needs nothing beside it, and you can clear that folder afterwards.
+Either one builds from source, in about a minute and a half on an M1 Pro. The first build also fetches [NeMo-Speech.cpp](https://github.com/NVIDIA/NeMo-Speech.cpp) and [llama.cpp](https://github.com/ggml-org/llama.cpp) and builds them in `~/Library/Caches/pam`. Both are linked into `dictate`, so the binary needs nothing beside it, and you can clear that folder afterwards.
 
 Then download the speech model, once:
 
