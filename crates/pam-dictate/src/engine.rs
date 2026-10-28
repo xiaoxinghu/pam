@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use anyhow::{Context, Result, bail};
-use pam_audio::{Mic, Pacer, Source, WavSource};
+use pam_audio::{Meter, Mic, Pacer, Source, WavSource};
 use pam_speech::{Transcriber, TranscriberConfig, Ts, Update, Word, join_words};
 use serde::Serialize;
 
@@ -25,6 +25,11 @@ pub enum Event {
     /// Listening to `device`: the mic's name, or the file replayed.
     Recording {
         device: String,
+    },
+    /// How loud the input is, from 0 to 1 against the room's noise floor,
+    /// for each chunk listened to: ten a second, to draw a level meter by.
+    Level {
+        level: f32,
     },
     /// The words not settled yet; replaces the previous preview.
     Preview {
@@ -112,6 +117,7 @@ pub fn run(opts: &Options, stop: &AtomicBool, emit: &mut dyn FnMut(Event)) -> Re
 
     let pacer = Pacer::start(if opts.realtime { 1.0 } else { replay_speed()? });
     let mut words = Transcript::default();
+    let mut meter = Meter::default();
     let limit = opts.timeout.unwrap_or(Ts::MAX);
     let mut pos: Ts = 0;
     while pos < limit && !stop.load(Ordering::Relaxed) {
@@ -121,6 +127,8 @@ pub fn run(opts: &Options, stop: &AtomicBool, emit: &mut dyn FnMut(Event)) -> Re
             break;
         }
         check(&mut source)?;
+        // Before the transcriber's turn, so the meter doesn't wait on it.
+        emit(Event::Level { level: hundredths(meter.level(&chunk)) });
         pos += chunk.len() as Ts;
         let update = transcriber.push(&chunk).context("transcriber")?;
         warn(transcriber.as_mut());
@@ -147,6 +155,12 @@ pub fn run(opts: &Options, stop: &AtomicBool, emit: &mut dyn FnMut(Event)) -> Re
         emit(Event::Text { text: text.clone() });
         Ok(Outcome::Text(text))
     }
+}
+
+/// `x` to two decimals, which a meter can't tell apart anyway, so a `level`
+/// line stays short.
+fn hundredths(x: f32) -> f32 {
+    (x * 100.0).round() / 100.0
 }
 
 /// The transcriber's warnings, on stderr: they don't stop it.
@@ -268,6 +282,7 @@ mod tests {
             r#"{"event":"recording","device":"Yeti"}"#
         );
         assert_eq!(line(Event::Error { message: "m".into() }), r#"{"event":"error","message":"m"}"#);
+        assert_eq!(line(Event::Level { level: hundredths(0.434_567) }), r#"{"event":"level","level":0.43}"#);
     }
 
     #[test]
