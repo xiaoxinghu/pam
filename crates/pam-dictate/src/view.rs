@@ -239,6 +239,7 @@ impl View {
             }
             Event::Transcribing => self.stopped = Some(now),
             Event::Loading
+            | Event::Level { .. }
             | Event::Text { .. }
             | Event::NoSpeech
             | Event::Error { .. }

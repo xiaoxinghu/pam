@@ -80,9 +80,11 @@ on a terminal (stdin a TTY, no --json): the words are drawn on the terminal as
   they are heard; Enter finishes and prints the text on stdout, Escape or
   Ctrl-C discards it. Anywhere else, or with --json, it speaks JSON lines:
 events, one JSON object per line on stdout:
-  loading, recording (device), preview (text), final (text), transcribing,
-  text (text), no-speech, error (message); and from dictate models pull,
-  downloading (model, bytes, total), as the download grows
+  loading, recording (device), level (level), preview (text), final (text),
+  transcribing, text (text), no-speech, error (message); and from dictate
+  models pull, downloading (model, bytes, total), as the download grows.
+  level comes ten times a second while listening: how loud the input is,
+  0 to 1 against the room's noise floor, for a level meter
 commands, one per line on stdin: stop (finish and print the text), cancel
   (exit at once); the end of stdin, SIGINT and SIGTERM are cancel
 exit codes: 0 text, 2 no speech, 3 cancelled, 1 error";

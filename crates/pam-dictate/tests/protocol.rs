@@ -89,8 +89,16 @@ fn kind(e: &Value) -> &str {
     e["event"].as_str().unwrap()
 }
 
+/// The kinds of `events`, but `level`, which comes ten times a second
+/// throughout; [`levels_come_ten_a_second_while_listening`] tests it.
 fn kinds(events: &[Value]) -> Vec<&str> {
-    events.iter().map(kind).collect()
+    events.iter().map(kind).filter(|k| *k != "level").collect()
+}
+
+/// A 16 kHz sine of `seconds`, at `amplitude` of full scale.
+fn tone(seconds: f64, amplitude: f32) -> Vec<f32> {
+    let n = (16_000.0 * seconds) as usize;
+    (0..n).map(|i| amplitude * (i as f32 * 300.0 * std::f32::consts::TAU / 16_000.0).sin()).collect()
 }
 
 /// The `final` events' texts, joined as `text` joins them.
@@ -219,6 +227,37 @@ fn a_recording_plays_through_the_transcriber_asked_for() {
     assert_eq!(events[1]["device"], "room.wav");
     // The recording's two seconds hold every word.
     assert_eq!(events.last().unwrap()["text"], "one two three four five six");
+}
+
+#[test]
+fn levels_come_ten_a_second_while_listening() {
+    let dir = tempfile::tempdir().unwrap();
+    // A second of a quiet room (-69 dBFS), then a second of speech-loud sound (-13 dBFS).
+    let wav = dir.path().join("room.wav");
+    let mut rec = pam_audio::Recorder::create(&wav).unwrap();
+    rec.write(&tone(1.0, 0.000_5)).unwrap();
+    rec.write(&tone(1.0, 0.3)).unwrap();
+    rec.finish().unwrap();
+    let asr = format!("fake:{}", long_script(dir.path()).display());
+    let (events, code) = run(&["--input", wav.to_str().unwrap(), "--asr", &asr]);
+    assert_eq!(code, 0, "{events:?}");
+
+    let all: Vec<&str> = events.iter().map(kind).collect();
+    let first = all.iter().position(|k| *k == "level").unwrap();
+    let last = all.iter().rposition(|k| *k == "level").unwrap();
+    assert_eq!(all[first - 1], "recording", "{all:?}");
+    assert!(last < all.iter().position(|k| *k == "transcribing").unwrap(), "{all:?}");
+
+    let levels: Vec<&Value> = events.iter().filter(|e| kind(e) == "level").map(|e| &e["level"]).collect();
+    assert!(
+        levels.iter().all(|l| l.to_string().split('.').nth(1).is_none_or(|d| d.len() <= 2)),
+        "two decimals at most: {levels:?}"
+    );
+    let levels: Vec<f64> = levels.iter().map(|l| l.as_f64().unwrap()).collect();
+    assert_eq!(levels.len(), 20, "one a chunk, 0.1 s each: {levels:?}");
+    assert!(levels.iter().all(|l| (0.0..=1.0).contains(l)), "{levels:?}");
+    assert!(levels[..10].iter().all(|l| *l == 0.0), "the room is the floor: {levels:?}");
+    assert!(levels[10..].iter().all(|l| *l == 1.0), "56 dB over it is full: {levels:?}");
 }
 
 #[test]
