@@ -8,9 +8,7 @@ use std::time::{Duration, Instant};
 
 use serde_json::Value;
 
-/// How much faster than real time scripts play, so a 38 s script takes 1 s.
-const SPEED: &str = "40";
-/// Far less than the 15 s [`long_script`] takes to play out at [`SPEED`].
+/// Far less than the ten minutes [`long_script`] takes to play out with `--realtime`.
 const WELL_BEFORE_THE_END: Duration = Duration::from_secs(5);
 
 fn fixture(name: &str) -> PathBuf {
@@ -28,7 +26,6 @@ fn dictate(args: &[&str]) -> Child {
 fn dictate_with(args: &[&str], config: &Path) -> Child {
     Command::new(env!("CARGO_BIN_EXE_dictate"))
         .args(args)
-        .env("DICTATE_REPLAY_SPEED", SPEED)
         .env("DICTATE_CONFIG", config)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -109,7 +106,8 @@ fn finals(events: &[Value]) -> String {
 }
 
 /// A script whose words are all said in the first two seconds, but which
-/// lasts ten minutes: time to send a command while it is playing.
+/// lasts ten minutes: with `--realtime`, time to send a command while it is
+/// playing.
 fn long_script(dir: &Path) -> PathBuf {
     let path = dir.join("long.fake.jsonl");
     let mut text = String::from("{\"config\": {\"word_delay\": 0.3, \"duration\": 600}}\n");
@@ -143,7 +141,7 @@ fn a_script_plays_to_its_end_and_gives_its_words() {
 fn cancel_exits_at_once_with_no_text() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
-    let mut child = dictate(&["--input", script.to_str().unwrap()]);
+    let mut child = dictate(&["--input", script.to_str().unwrap(), "--realtime"]);
     let mut lines = Lines::of(&mut child);
     lines.until_final();
     let sent = Instant::now();
@@ -158,7 +156,7 @@ fn cancel_exits_at_once_with_no_text() {
 fn stop_gives_the_finals_so_far_and_what_the_transcriber_flushed() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
-    let mut child = dictate(&["--input", script.to_str().unwrap()]);
+    let mut child = dictate(&["--input", script.to_str().unwrap(), "--realtime"]);
     let mut lines = Lines::of(&mut child);
     let mut events = lines.until_final();
     let sent = Instant::now();
@@ -201,7 +199,7 @@ fn a_timeout_is_a_stop() {
 fn sigterm_is_a_cancel() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
-    let mut child = dictate(&["--input", script.to_str().unwrap()]);
+    let mut child = dictate(&["--input", script.to_str().unwrap(), "--realtime"]);
     let mut lines = Lines::of(&mut child);
     lines.until_final();
     let sent = Instant::now();
@@ -332,7 +330,6 @@ fn cancel_and_signals_end_it_even_when_no_one_reads_stdout() {
     for how in ["cancel", "SIGTERM"] {
         let mut child = Command::new(env!("CARGO_BIN_EXE_dictate"))
             .args(["--input", script.to_str().unwrap()])
-            .env("DICTATE_REPLAY_SPEED", "1000")
             .env("DICTATE_CONFIG", NO_CONFIG)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -340,7 +337,7 @@ fn cancel_and_signals_end_it_even_when_no_one_reads_stdout() {
             .spawn()
             .unwrap();
         // Unread, stdout fills and the engine blocks writing to it. Were it
-        // not blocked, the script would be over (0.6 s) and exit 0.
+        // not blocked, the script, unpaced, would be over and exit 0.
         std::thread::sleep(Duration::from_secs(1));
         let sent = Instant::now();
         if how == "cancel" {
@@ -367,7 +364,7 @@ fn cancel_and_signals_end_it_even_when_no_one_reads_stdout() {
 fn the_end_of_stdin_is_a_cancel() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
-    let mut child = dictate(&["--input", script.to_str().unwrap()]);
+    let mut child = dictate(&["--input", script.to_str().unwrap(), "--realtime"]);
     let mut lines = Lines::of(&mut child);
     lines.until_final();
     let sent = Instant::now();
@@ -376,4 +373,120 @@ fn the_end_of_stdin_is_a_cancel() {
     assert!(sent.elapsed() < WELL_BEFORE_THE_END, "{:?}", sent.elapsed());
     assert_eq!(code, 3);
     assert!(!kinds(&rest).contains(&"text"), "{rest:?}");
+}
+
+#[test]
+fn each_final_carries_its_words_with_their_times() {
+    let script = fixture("intros.fake.jsonl");
+    let (events, code) = run(&["--input", script.to_str().unwrap()]);
+    assert_eq!(code, 0, "{events:?}");
+    let mut heard = Vec::new();
+    for e in events.iter().filter(|e| kind(e) == "final") {
+        let words = e["words"].as_array().unwrap_or_else(|| panic!("no words: {e}"));
+        let texts: Vec<&str> = words.iter().map(|w| w["text"].as_str().unwrap()).collect();
+        assert_eq!(texts.join(" "), e["text"].as_str().unwrap());
+        heard.extend(words.iter().cloned());
+    }
+    assert!(events.iter().filter(|e| kind(e) == "preview").all(|e| e.get("words").is_none()));
+
+    let said = pam_speech::fake::Script::load(&script).unwrap().words;
+    assert_eq!(heard.len(), said.len());
+    for (h, s) in heard.iter().zip(&said) {
+        let secs = |ts: u64| (ts as f64 / 16.0).round() / 1_000.0;
+        assert_eq!(h["text"], s.text.as_str());
+        assert_eq!(
+            (h["start"].as_f64().unwrap(), h["end"].as_f64().unwrap()),
+            (secs(s.start), secs(s.end)),
+            "{h}"
+        );
+        let decimals = |v: &Value| v.to_string().split('.').nth(1).map_or(0, str::len);
+        assert!(decimals(&h["start"]) <= 3 && decimals(&h["end"]) <= 3, "to the millisecond: {h}");
+    }
+}
+
+/// `audio` as raw 16 kHz f32le samples, as `ffmpeg -f f32le -` writes them.
+fn f32le(audio: &[f32]) -> Vec<u8> {
+    audio.iter().flat_map(|s| s.to_le_bytes()).collect()
+}
+
+/// Writes `bytes` to the child's stdin from a thread of its own, so that
+/// neither side waits on the other; then closes it.
+fn feed(child: &mut Child, bytes: Vec<u8>) -> std::thread::JoinHandle<()> {
+    let mut stdin = child.stdin.take().unwrap();
+    std::thread::spawn(move || stdin.write_all(&bytes).unwrap())
+}
+
+#[test]
+fn stdin_is_the_audio_and_its_end_is_the_stop() {
+    let dir = tempfile::tempdir().unwrap();
+    let asr = format!("fake:{}", long_script(dir.path()).display());
+    let mut child = dictate(&["--input", "-", "--asr", &asr]);
+    let mut stdin = child.stdin.take().unwrap();
+    let mut lines = Lines::of(&mut child);
+    // A second, and "stop" on a line, which is audio here and not a
+    // command; then a wait: stdin open but quiet is no stop.
+    stdin.write_all(&f32le(&tone(1.0, 0.3))).unwrap();
+    stdin.write_all(b"stop\n\0\0\0").unwrap();
+    let mut events = lines.until_final();
+    assert_eq!(events[1]["device"], "stdin");
+    std::thread::sleep(Duration::from_millis(300));
+    stdin.write_all(&f32le(&tone(1.0, 0.3)[2..])).unwrap();
+    drop(stdin);
+    let (rest, code) = finish(child, lines);
+    events.extend(rest);
+    assert_eq!(code, 0, "{events:?}");
+    let k = kinds(&events);
+    let flushed = k.iter().position(|e| *e == "transcribing").expect("transcribing");
+    assert!(k[flushed + 1..k.len() - 1].iter().all(|e| *e == "final"), "{k:?}");
+    assert_eq!(k.last(), Some(&"text"));
+    // Its two seconds hold every word.
+    assert_eq!(events.last().unwrap()["text"], "one two three four five six");
+    assert_eq!(finals(&events), "one two three four five six");
+    assert_eq!(events.iter().filter(|e| kind(e) == "level").count(), 20);
+}
+
+#[test]
+fn stdin_gives_the_same_events_as_the_wav_of_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let wav = dir.path().join("talk.wav");
+    let mut rec = pam_audio::Recorder::create(&wav).unwrap();
+    rec.write(&tone(1.0, 0.000_5)).unwrap();
+    rec.write(&tone(1.5, 0.3)).unwrap();
+    rec.finish().unwrap();
+    // The WAV's samples, raw, as a decoder would hand them over.
+    let mut src = pam_audio::WavSource::open(&wav).unwrap();
+    let raw = f32le(&src.read(src.duration as usize).unwrap());
+    assert_eq!(raw.len(), 40_000 * 4);
+
+    let asr = format!("fake:{}", long_script(dir.path()).display());
+    let (from_wav, code) = run(&["--input", wav.to_str().unwrap(), "--asr", &asr]);
+    assert_eq!(code, 0, "{from_wav:?}");
+    let mut child = dictate(&["--input", "-", "--asr", &asr]);
+    let fed = feed(&mut child, raw);
+    let lines = Lines::of(&mut child);
+    let (from_stdin, code) = finish(child, lines);
+    fed.join().unwrap();
+    assert_eq!(code, 0, "{from_stdin:?}");
+
+    let without_device = |events: &[Value]| {
+        let mut events = events.to_vec();
+        events[1]["device"] = Value::Null;
+        events
+    };
+    assert_eq!(without_device(&from_stdin), without_device(&from_wav));
+    assert!(finals(&from_wav).starts_with("one two three"), "{from_wav:?}");
+}
+
+#[test]
+fn stdin_cut_in_the_middle_of_a_sample_is_an_error() {
+    let dir = tempfile::tempdir().unwrap();
+    let asr = format!("fake:{}", long_script(dir.path()).display());
+    let mut child = dictate(&["--input", "-", "--asr", &asr]);
+    let fed = feed(&mut child, vec![0; 16_002]);
+    let lines = Lines::of(&mut child);
+    let (events, code) = finish(child, lines);
+    fed.join().unwrap();
+    assert_eq!(code, 1, "{events:?}");
+    let message = events.last().unwrap()["message"].as_str().unwrap();
+    assert!(message.contains("middle of a sample"), "{message}");
 }

@@ -6,7 +6,7 @@
 
 use std::collections::VecDeque;
 use std::fs::File;
-use std::io::BufWriter;
+use std::io::{BufWriter, Read};
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -391,11 +391,50 @@ impl WavSource {
     }
 }
 
-/// An open input: the mic, a 16 kHz WAV, or silence of a given length,
-/// which drives the `fake` speech backends, which only count samples.
+/// Raw 16 kHz mono 32-bit float samples, little-endian, from a stream such as
+/// stdin: what `ffmpeg -ar 16000 -ac 1 -f f32le -` writes. Raw, not a WAV:
+/// a WAV written to a pipe can't say its length in its header.
+pub struct RawSource {
+    stream: Box<dyn Read + Send>,
+    /// The bytes of a sample split between two reads.
+    partial: Vec<u8>,
+}
+
+impl RawSource {
+    pub fn new(stream: impl Read + Send + 'static) -> RawSource {
+        RawSource { stream: Box::new(stream), partial: Vec::new() }
+    }
+
+    /// Up to `n` samples, waiting for them; fewer only at the end of the stream.
+    pub fn read(&mut self, n: usize) -> Result<Vec<f32>> {
+        let mut bytes = std::mem::take(&mut self.partial);
+        let want = n * 4;
+        let mut buf = [0u8; 16_384];
+        while bytes.len() < want {
+            let len = buf.len().min(want - bytes.len());
+            match self.stream.read(&mut buf[..len]) {
+                Ok(0) => break,
+                Ok(got) => bytes.extend_from_slice(&buf[..got]),
+                Err(e) if e.kind() == std::io::ErrorKind::Interrupted => {}
+                Err(e) => return Err(e).context("reading the raw audio"),
+            }
+        }
+        let whole = bytes.len() / 4 * 4;
+        if bytes.len() < want && whole < bytes.len() {
+            bail!("the raw audio ends in the middle of a sample: is it 32-bit float (f32le)?");
+        }
+        self.partial = bytes.split_off(whole);
+        Ok(bytes.chunks_exact(4).map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]])).collect())
+    }
+}
+
+/// An open input: the mic, a 16 kHz WAV, raw samples from a stream, or
+/// silence of a given length, which drives the `fake` speech backends,
+/// which only count samples.
 pub enum Source {
     Mic(Box<Mic>),
     Wav(WavSource),
+    Raw(RawSource),
     Silence { left: Ts },
 }
 
@@ -413,6 +452,7 @@ impl Source {
         match self {
             Source::Mic(mic) => mic.read(n, stop),
             Source::Wav(wav) => wav.read(n),
+            Source::Raw(raw) => raw.read(n),
             Source::Silence { left } => {
                 let n = (*left).min(n as Ts);
                 *left -= n;
@@ -515,6 +555,44 @@ mod tests {
         assert_eq!(back.len(), 4_000);
         assert!(back.iter().zip(&audio).all(|(a, b)| (a - b).abs() < 1e-4));
         assert!(src.read(10).unwrap().is_empty());
+    }
+
+    /// A stream that hands out at most `step` bytes a read, as a pipe may.
+    struct Trickle {
+        bytes: Vec<u8>,
+        at: usize,
+        step: usize,
+    }
+
+    impl Read for Trickle {
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            let n = buf.len().min(self.step).min(self.bytes.len() - self.at);
+            buf[..n].copy_from_slice(&self.bytes[self.at..self.at + n]);
+            self.at += n;
+            Ok(n)
+        }
+    }
+
+    fn f32le(audio: &[f32]) -> Vec<u8> {
+        audio.iter().flat_map(|s| s.to_le_bytes()).collect()
+    }
+
+    #[test]
+    fn raw_samples_read_whole_however_the_stream_splits_them() {
+        let audio: Vec<f32> = (0..1_000).map(|i| ((i as f32) / 50.0).sin() * 0.5).collect();
+        for step in [1, 3, 4, 4_001, 1 << 20] {
+            let mut src = RawSource::new(Trickle { bytes: f32le(&audio), at: 0, step });
+            let back = [src.read(600).unwrap(), src.read(600).unwrap()].concat();
+            assert_eq!(back, audio, "{step} bytes a read");
+            assert!(src.read(10).unwrap().is_empty());
+        }
+
+        let mut cut = f32le(&[0.25, 0.5]);
+        cut.pop();
+        let mut src = RawSource::new(Trickle { bytes: cut, at: 0, step: 3 });
+        assert_eq!(src.read(1).unwrap(), [0.25]);
+        let err = src.read(10).unwrap_err().to_string();
+        assert!(err.contains("middle of a sample") && err.contains("f32le"), "{err}");
     }
 
     fn tone(rate: u32, hz: f32, secs: f32, amp: f32) -> Vec<f32> {

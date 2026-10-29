@@ -1,7 +1,8 @@
 //! `dictate`: listens to the mic, transcribes live and hands back the text.
 //!
 //! It has two faces on one engine. Piped, it speaks JSON lines: events on
-//! stdout, commands (`stop`, `cancel`) on stdin, one per line. A shell
+//! stdout, commands (`stop`, `cancel`) on stdin, one per line; or, with
+//! `--input -`, stdin is the audio, and its end the stop. A shell
 //! (Portal, Hammerspoon) drives it; the shortcut, panel and pasting are the
 //! shell's. On a terminal, a person drives it: the view shows the words and
 //! takes Enter or Escape, and only the text goes to stdout.
@@ -19,7 +20,7 @@ use std::sync::{Arc, Mutex, TryLockError};
 use std::time::{Duration, Instant};
 
 use config::Config;
-use engine::{Event, Outcome};
+use engine::{Event, Input, Outcome};
 
 /// Exit codes: the text was heard, nothing was, cancelled, failed.
 const TEXT: u8 = 0;
@@ -63,6 +64,10 @@ fn main() -> ExitCode {
         Ok(opts) => opts,
         Err(msg) => return usage_error(msg, piped),
     };
+    if terminal && matches!(opts.input, Input::Stdin) {
+        let msg = "--input - reads audio from stdin, which is a terminal: pipe raw 16 kHz f32le samples in";
+        return usage_error(msg.into(), piped);
+    }
     // Before the mic opens. Nothing is downloaded on a hotkey's press, where it
     // would read as a hang and fail offline.
     if let Err(e) = models::check(&opts) {
@@ -77,7 +82,9 @@ fn main() -> ExitCode {
     if !piped {
         return said(view::run(&opts, &stop));
     }
-    read_commands(stop.clone());
+    if !matches!(opts.input, Input::Stdin) {
+        read_commands(stop.clone());
+    }
     match engine::run(&opts, &stop, &mut emit) {
         Ok(Outcome::Text(_)) => ExitCode::from(TEXT),
         Ok(Outcome::NoSpeech) => ExitCode::from(NO_SPEECH),
