@@ -44,7 +44,15 @@ dictate            # speak; Enter prints the text, Escape discards it
 dictate | pbcopy   # the same, and the text goes to the clipboard
 ```
 
-When stdin isn't a terminal, or with `--json`, `dictate` speaks JSON lines instead, for a program to drive: events on stdout, `stop` or `cancel` on stdin. The end of stdin counts as `cancel`, so keep it open. `dictate --help` covers the options, the config file (`~/.config/dictate/config.toml`) and the protocol.
+When stdin isn't a terminal, or with `--json`, `dictate` speaks JSON lines instead, for a program to drive: events on stdout, `stop` or `cancel` on stdin. The end of stdin counts as `cancel`, so keep it open. Each `final` event carries its words with their times, in seconds. `dictate --help` covers the options, the config file (`~/.config/dictate/config.toml`) and the protocol.
+
+To transcribe a recording or a video, decode it to raw 16 kHz mono 32-bit float samples (f32le) and pipe them in with `--input -`:
+
+```sh
+ffmpeg -loglevel error -i talk.mp4 -ar 16000 -ac 1 -f f32le - | dictate --input -
+```
+
+ffmpeg is the usual decoder (`brew install ffmpeg`); this repository doesn't install it. With `--input -`, stdin is the audio rather than commands, and its end is the `stop`. A file runs as fast as the model goes, not at the pace it was spoken; `--realtime` plays it at real speed.
 
 ## Using `pam`
 

@@ -29,7 +29,7 @@ const fn switch(name: &'static str, help: &'static str) -> Arg {
 }
 
 const USAGE: &str =
-    "dictate [--input mic|<file.wav>|<script.fake.jsonl>] [--realtime] [--device <name>] [--asr <backend:model>]
+    "dictate [--input mic|-|<file.wav>|<script.fake.jsonl>] [--realtime] [--device <name>] [--asr <backend:model>]
                [--language <code>] [--hint <word>]... [--hints <file>] [--timeout <seconds>] [--json]
        dictate models list | pull [<name>...] | rm <name>... | path [--json]";
 
@@ -37,11 +37,11 @@ const ARGS: &[Arg] = &[
     opt(
         "--input",
         "",
-        "what to listen to: mic, the default; a 16 kHz recording (*.wav); or a fake script (*.fake.jsonl), which is its own transcriber. A recording or script is replayed in real time, as if spoken, and its end is a stop",
+        "what to listen to: mic, the default; -, raw 16 kHz mono 32-bit float samples (f32le) on stdin, which then carries no commands; a 16 kHz recording (*.wav); or a fake script (*.fake.jsonl), which is its own transcriber. Anything but the mic runs as fast as the transcriber goes, and its end is a stop",
     ),
     switch(
         "--realtime",
-        "replay a recording or script at real-time speed, as if spoken. dictate always does; the switch is pam listen's, so the same command line works for both",
+        "take stdin, a recording or a script at real-time speed, as if spoken, rather than as fast as the transcriber goes",
     ),
     opt("--device", "mic", "the input device's name, with --input mic (default: the system's default input)"),
     opt("--asr", "asr", "the transcriber, as <backend>:<model> (default nemo-speech:nemotron-en)"),
@@ -70,6 +70,10 @@ const EXAMPLES: &[(&str, &str)] = &[
         "dictate through a given mic, a minute at most",
     ),
     ("dictate | pbcopy", "dictate on the terminal, then copy the text"),
+    (
+        "ffmpeg -loglevel error -i talk.mp4 -ar 16000 -ac 1 -f f32le - | dictate --input -",
+        "transcribe a recording in any format, with word times",
+    ),
     ("dictate --input fixtures/intros.fake.jsonl --json", "replay a fake script, to see the events"),
     ("dictate --hint obento --hints ~/.config/dictate/hints.txt", "favour some words"),
     ("dictate models pull", "get the model the config needs, once"),
@@ -80,13 +84,16 @@ on a terminal (stdin a TTY, no --json): the words are drawn on the terminal as
   they are heard; Enter finishes and prints the text on stdout, Escape or
   Ctrl-C discards it. Anywhere else, or with --json, it speaks JSON lines:
 events, one JSON object per line on stdout:
-  loading, recording (device), level (level), preview (text), final (text),
-  transcribing, text (text), no-speech, error (message); and from dictate
-  models pull, downloading (model, bytes, total), as the download grows.
+  loading, recording (device), level (level), preview (text), final (text,
+  words), transcribing, text (text), no-speech, error (message); and from
+  dictate models pull, downloading (model, bytes, total), as the download grows.
   level comes ten times a second while listening: how loud the input is,
-  0 to 1 against the room's noise floor, for a level meter
+  0 to 1 against the room's noise floor, for a level meter. words is each
+  word of the final as {text, start, end}, in seconds from the input's start
 commands, one per line on stdin: stop (finish and print the text), cancel
-  (exit at once); the end of stdin, SIGINT and SIGTERM are cancel
+  (exit at once); the end of stdin, SIGINT and SIGTERM are cancel. With
+  --input -, stdin is the audio instead: its end is the stop, and SIGINT and
+  SIGTERM still cancel
 exit codes: 0 text, 2 no speech, 3 cancelled, 1 error";
 
 const CONFIG: &str = "\
@@ -170,6 +177,7 @@ impl Flags {
         let input = match value("--input").as_deref() {
             None | Some("mic") => Input::Mic(value("--device").or_else(|| config.mic.clone())),
             Some(_) if value("--device").is_some() => return Err("--device is for --input mic".into()),
+            Some("-") => Input::Stdin,
             Some(path) if path.ends_with(".fake.jsonl") => {
                 if value("--asr").is_some() {
                     return Err("--asr doesn't go with a fake script: the script is the transcriber".into());
@@ -178,12 +186,14 @@ impl Flags {
             }
             Some(path) if path.ends_with(".wav") => Input::Wav(PathBuf::from(path)),
             Some(other) => {
-                return Err(format!("--input {other}: give mic, a .wav recording or a .fake.jsonl script"));
+                return Err(format!(
+                    "--input {other}: give mic, - for stdin, a .wav recording or a .fake.jsonl script"
+                ));
             }
         };
         let realtime = options.iter().any(|(n, _)| *n == "--realtime");
         if realtime && matches!(input, Input::Mic(_)) {
-            return Err("--realtime is for replaying a recording or script; the mic is always live".into());
+            return Err("--realtime is for stdin, a recording or a script; the mic is always live".into());
         }
         let seconds = match value("--timeout") {
             None => config.timeout,
@@ -326,6 +336,8 @@ mod tests {
     fn the_input_is_chosen_by_its_name() {
         assert!(matches!(run("--input a.wav").unwrap().0.input, Input::Wav(_)));
         assert!(matches!(run("--input a.fake.jsonl").unwrap().0.input, Input::Script(_)));
+        assert!(matches!(run("--input -").unwrap().0.input, Input::Stdin));
+        assert!(run("--input - --realtime").unwrap().0.realtime);
         assert!(run("--input a.mp3").unwrap_err().contains(".wav"));
         assert!(run("--input a.wav --device Yeti").unwrap_err().contains("--input mic"));
         assert!(run("--input a.fake.jsonl --asr fake:b.jsonl").is_err());

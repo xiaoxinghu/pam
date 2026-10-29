@@ -14,8 +14,6 @@ use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
-/// How much faster than real time scripts play, as in the protocol tests.
-const SPEED: &str = "40";
 /// Where the tests' config file is: nowhere, so that the config of whoever
 /// runs them stays out of it.
 const NO_CONFIG: &str = "/nonexistent/dictate/config.toml";
@@ -30,7 +28,8 @@ fn fixture(name: &str) -> PathBuf {
 }
 
 /// A script whose words are all said in the first two seconds, but which
-/// lasts ten minutes: time to press a key while it is playing.
+/// lasts ten minutes: with `--realtime`, time to press a key while it is
+/// playing.
 fn long_script(dir: &Path) -> PathBuf {
     script(dir, "long.fake.jsonl", 0.3)
 }
@@ -89,7 +88,6 @@ impl Run {
         let (master, slave) = unsafe { (File::from_raw_fd(master), OwnedFd::from_raw_fd(slave)) };
         let mut cmd = Command::new(env!("CARGO_BIN_EXE_dictate"));
         cmd.args(args)
-            .env("DICTATE_REPLAY_SPEED", SPEED)
             .env("DICTATE_CONFIG", NO_CONFIG)
             .env("PAM_MODELS", NO_MODELS)
             .stdin(Stdio::from(slave))
@@ -186,7 +184,7 @@ fn dim_first_word(s: &vt100::Screen) -> bool {
 fn the_words_show_as_they_come_and_enter_prints_the_text() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
-    let mut run = Run::start(&["--input", script.to_str().unwrap()], 12, 70);
+    let mut run = Run::start(&["--input", script.to_str().unwrap(), "--realtime"], 12, 70);
     run.wait_for("the frame", framed);
     run.wait_for_text("long.fake.jsonl");
     run.wait_for_text("Enter finish");
@@ -206,7 +204,7 @@ fn the_words_show_as_they_come_and_enter_prints_the_text() {
 fn the_preview_is_dim_and_a_stop_settles_it() {
     let dir = tempfile::tempdir().unwrap();
     let script = pending_script(dir.path());
-    let mut run = Run::start(&["--input", script.to_str().unwrap()], 12, 70);
+    let mut run = Run::start(&["--input", script.to_str().unwrap(), "--realtime"], 12, 70);
     run.wait_for_text("one two three four five six");
     run.wait_for("a dim preview", dim_first_word);
     run.key(b"\r");
@@ -219,7 +217,7 @@ fn escape_ctrl_c_and_sigterm_discard_it() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
     for how in ["Escape", "Ctrl-C", "SIGTERM"] {
-        let mut run = Run::start(&["--input", script.to_str().unwrap()], 12, 70);
+        let mut run = Run::start(&["--input", script.to_str().unwrap(), "--realtime"], 12, 70);
         run.wait_for_text("one two");
         let sent = Instant::now();
         match how {
@@ -309,7 +307,7 @@ fn json_keeps_the_piped_face_on_a_terminal() {
 fn resizing_redraws_the_view() {
     let dir = tempfile::tempdir().unwrap();
     let script = long_script(dir.path());
-    let mut run = Run::start(&["--input", script.to_str().unwrap()], 12, 70);
+    let mut run = Run::start(&["--input", script.to_str().unwrap(), "--realtime"], 12, 70);
     run.wait_for_text("one two three");
     for (rows, cols) in [(6, 30), (20, 100), (4, 16)] {
         run.resize(rows, cols);
@@ -363,4 +361,12 @@ fn a_two_minute_dictation_at_real_speed() {
 
 fn nz(n: u16) -> NonZeroU16 {
     NonZeroU16::new(n).unwrap()
+}
+
+#[test]
+fn stdin_as_the_audio_must_be_piped() {
+    let end = Run::start(&["--input", "-"], 12, 70).end();
+    assert_eq!((end.code, end.stdout.as_str()), (1, ""));
+    assert!(end.stderr.contains("--input - reads audio from stdin, which is a terminal"), "{}", end.stderr);
+    assert!(!end.screen.alternate_screen());
 }

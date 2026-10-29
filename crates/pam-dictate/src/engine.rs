@@ -5,16 +5,12 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use anyhow::{Context, Result, bail};
-use pam_audio::{Meter, Mic, Pacer, Source, WavSource};
-use pam_speech::{Transcriber, TranscriberConfig, Ts, Update, Word, join_words};
+use pam_audio::{Meter, Mic, Pacer, RawSource, Source, WavSource};
+use pam_speech::{SAMPLE_RATE, Transcriber, TranscriberConfig, Ts, Update, Word, join_words};
 use serde::Serialize;
 
 /// Samples pushed at a time: 0.1 s, as a meeting pushes them.
 const CHUNK: usize = 1_600;
-
-/// How many times faster than real time a recording or script is replayed;
-/// for the tests, which would otherwise wait for every script to play out.
-pub const SPEED_VAR: &str = "DICTATE_REPLAY_SPEED";
 
 /// What the engine reports, one JSON object per line.
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -35,9 +31,11 @@ pub enum Event {
     Preview {
         text: String,
     },
-    /// One settled run of words, appended to those before.
+    /// One settled run of words, appended to those before, and each word
+    /// with its times.
     Final {
         text: String,
+        words: Vec<TimedWord>,
     },
     /// Stopped; the last words are settling.
     Transcribing,
@@ -59,12 +57,30 @@ pub enum Event {
     },
 }
 
+/// A word of a `final`, and when it was said: seconds from the start of the
+/// input, to the millisecond.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct TimedWord {
+    pub text: String,
+    pub start: f64,
+    pub end: f64,
+}
+
+impl From<&Word> for TimedWord {
+    fn from(w: &Word) -> TimedWord {
+        let secs = |ts: Ts| (ts as f64 / SAMPLE_RATE as f64 * 1_000.0).round() / 1_000.0;
+        TimedWord { text: w.text.clone(), start: secs(w.start), end: secs(w.end) }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Input {
     /// A microphone by name, or the default input.
     Mic(Option<String>),
     /// A 16 kHz WAV file.
     Wav(PathBuf),
+    /// Raw 16 kHz mono f32le samples on stdin, which then carries no commands.
+    Stdin,
     /// A fake script, which is also the transcriber: silence of its length
     /// goes into the `fake` backend.
     Script(PathBuf),
@@ -81,8 +97,8 @@ pub struct Options {
     pub hints_file: Option<PathBuf>,
     /// Stop after this much audio; `None` for never.
     pub timeout: Option<Ts>,
-    /// Replay a recording or script at real-time speed whatever
-    /// [`SPEED_VAR`] says.
+    /// Replay a recording, script or stdin at real-time speed, as if spoken,
+    /// rather than as fast as the transcriber goes.
     pub realtime: bool,
 }
 
@@ -115,7 +131,7 @@ pub fn run(opts: &Options, stop: &AtomicBool, emit: &mut dyn FnMut(Event)) -> Re
     source.start()?;
     emit(Event::Recording { device });
 
-    let pacer = Pacer::start(if opts.realtime { 1.0 } else { replay_speed()? });
+    let pacer = opts.realtime.then(|| Pacer::start(1.0));
     let mut words = Transcript::default();
     let mut meter = Meter::default();
     let limit = opts.timeout.unwrap_or(Ts::MAX);
@@ -135,7 +151,7 @@ pub fn run(opts: &Options, stop: &AtomicBool, emit: &mut dyn FnMut(Event)) -> Re
         for e in words.update(update) {
             emit(e);
         }
-        if !matches!(source, Source::Mic(_)) {
+        if let Some(pacer) = &pacer {
             pacer.wait_until(pos);
         }
     }
@@ -182,17 +198,7 @@ fn read_hints(path: &Path) -> Result<Vec<String>> {
         .collect())
 }
 
-fn replay_speed() -> Result<f64> {
-    match std::env::var(SPEED_VAR) {
-        Err(_) => Ok(1.0),
-        Ok(s) => match s.parse::<f64>() {
-            Ok(x) if x > 0.0 && x.is_finite() => Ok(x),
-            _ => bail!("{SPEED_VAR}={s}: give a speed above 0, e.g. 20"),
-        },
-    }
-}
-
-/// Opens `input`, and names it: the mic, or the file.
+/// Opens `input`, and names it: the mic, the file, or stdin.
 fn open(input: &Input) -> Result<(Source, String)> {
     let file_name = |p: &Path| p.file_name().unwrap_or(p.as_os_str()).to_string_lossy().into_owned();
     Ok(match input {
@@ -202,6 +208,7 @@ fn open(input: &Input) -> Result<(Source, String)> {
             (Source::Mic(Box::new(mic)), name)
         }
         Input::Wav(path) => (Source::Wav(WavSource::open(path)?), file_name(path)),
+        Input::Stdin => (Source::Raw(RawSource::new(std::io::stdin())), "stdin".into()),
         Input::Script(path) => {
             let left = pam_speech::fake::Script::load(path)?.duration;
             (Source::Silence { left }, file_name(path))
@@ -248,13 +255,14 @@ impl Transcript {
         let mut rest = &words[..];
         while !rest.is_empty() {
             let len = rest.iter().skip(1).position(|w| w.starts_utterance).map_or(rest.len(), |i| i + 1);
-            let text = join_words(&rest[..len]);
-            rest = &rest[len..];
+            let (said, more) = rest.split_at(len);
+            rest = more;
+            let text = join_words(said);
             if text.trim().is_empty() {
                 continue;
             }
             self.finals.push(text.clone());
-            out.push(Event::Final { text });
+            out.push(Event::Final { text, words: said.iter().map(TimedWord::from).collect() });
         }
         out
     }
@@ -272,6 +280,17 @@ mod tests {
         Word { text: text.into(), starts_utterance, ..Word::default() }
     }
 
+    /// A word said from `start` to `end`, in samples.
+    fn said(text: &str, starts_utterance: bool, start: Ts, end: Ts) -> Word {
+        Word { start, end, ..word(text, starts_utterance) }
+    }
+
+    fn final_(text: &str, words: &[(&str, f64, f64)]) -> Event {
+        let words =
+            words.iter().map(|&(text, start, end)| TimedWord { text: text.into(), start, end }).collect();
+        Event::Final { text: text.into(), words }
+    }
+
     #[test]
     fn events_are_one_json_object_per_line() {
         let line = |e: Event| serde_json::to_string(&e).unwrap();
@@ -283,6 +302,13 @@ mod tests {
         );
         assert_eq!(line(Event::Error { message: "m".into() }), r#"{"event":"error","message":"m"}"#);
         assert_eq!(line(Event::Level { level: hundredths(0.434_567) }), r#"{"event":"level","level":0.43}"#);
+        assert_eq!(
+            line(Event::Final {
+                text: "Hi.".into(),
+                words: vec![TimedWord::from(&said("Hi.", true, 16_000, 21_000))]
+            }),
+            r#"{"event":"final","text":"Hi.","words":[{"text":"Hi.","start":1.0,"end":1.313}]}"#
+        );
     }
 
     #[test]
@@ -292,18 +318,25 @@ mod tests {
         assert_eq!(t.update(u.clone()), [Event::Preview { text: "so let's".into() }]);
         assert_eq!(t.update(u), []);
         let u = Update {
-            finalized: vec![word("So", true), word("there.", false), word("And", true)],
+            finalized: vec![
+                said("So", true, 19_200, 21_760),
+                said("there.", false, 21_760, 25_000),
+                said("And", true, 40_000, 41_280),
+            ],
             preview: vec![],
         };
         assert_eq!(
             t.update(u),
             [
-                Event::Final { text: "So there.".into() },
-                Event::Final { text: "And".into() },
+                final_("So there.", &[("So", 1.2, 1.36), ("there.", 1.36, 1.563)]),
+                final_("And", &[("And", 2.5, 2.58)]),
                 Event::Preview { text: String::new() }
             ]
         );
-        assert_eq!(t.flush(vec![word("more.", false)]), [Event::Final { text: "more.".into() }]);
+        assert_eq!(
+            t.flush(vec![said("more.", false, 48_000, 49_280)]),
+            [final_("more.", &[("more.", 3.0, 3.08)])]
+        );
         assert_eq!(t.text(), "So there. And more.");
     }
 

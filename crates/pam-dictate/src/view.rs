@@ -229,7 +229,7 @@ impl View {
                 self.began = Some(now);
             }
             Event::Preview { text } => self.preview = text,
-            Event::Final { text } => {
+            Event::Final { text, .. } => {
                 self.finals.push(text);
                 // After a stop the flushed words come as finals, with no
                 // preview after them to take theirs away.
@@ -370,7 +370,7 @@ mod tests {
         let t0 = Instant::now();
         let mut v = view(None);
         v.apply(Event::Recording { device: "mic".into() }, t0);
-        v.apply(Event::Final { text: "So there.".into() }, t0);
+        v.apply(Event::Final { text: "So there.".into(), words: Vec::new() }, t0);
         v.apply(Event::Preview { text: "and then".into() }, t0);
         let b = draw(&v, t0, 60, 6);
         assert!(!dim(&b, find(&b, "So there.").unwrap()));
@@ -399,7 +399,7 @@ mod tests {
         v.apply(Event::Preview { text: "almost done".into() }, t0);
         v.apply(Event::Transcribing, t0);
         assert_eq!(v.preview, "almost done", "the preview stays until its words settle");
-        v.apply(Event::Final { text: "Almost done.".into() }, t0);
+        v.apply(Event::Final { text: "Almost done.".into(), words: Vec::new() }, t0);
         assert_eq!((v.finals.as_slice(), v.preview.as_str()), (&["Almost done.".to_string()][..], ""));
     }
 
@@ -410,7 +410,7 @@ mod tests {
         v.apply(Event::Recording { device: "mic".into() }, t0);
         // Two minutes of speech, about 300 words.
         for i in 0..60 {
-            v.apply(Event::Final { text: format!("sentence {i} has five words.") }, t0);
+            v.apply(Event::Final { text: format!("sentence {i} has five words."), words: Vec::new() }, t0);
         }
         v.apply(Event::Preview { text: "the very last".into() }, t0);
         let b = draw(&v, t0 + Duration::from_secs(120), 40, 8);
